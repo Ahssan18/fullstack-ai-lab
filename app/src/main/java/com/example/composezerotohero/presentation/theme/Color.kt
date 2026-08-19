@@ -1,4 +1,4 @@
-package com.example.composezerotohero.ui.theme
+package com.example.composezerotohero.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.example.composezerotohero.ui.app.MyApp
-import com.example.composezerotohero.ui.theme.ComposeZeroToHeroTheme
+import com.example.composezerotohero.presentation.main.HeroApp
+import com.example.composezerotohero.presentation.theme.ComposeZeroToHeroTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,9 +17,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposeZeroToHeroTheme {
-                MyApp()
+                HeroApp()
             }
         }
     }
 }
-
