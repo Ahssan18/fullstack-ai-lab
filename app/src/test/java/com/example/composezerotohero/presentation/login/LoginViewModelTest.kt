@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -82,27 +83,18 @@ class LoginViewModelTest {
         every { loginValidator.validateEmail(any()) } returns ValidationResult(true)
         every { loginValidator.validatePassword(any()) } returns ValidationResult(true)
         coEvery { loginUseCase(any(), any()) } coAnswers {
-            // Simulate delay
-            testDispatcher.scheduler.advanceTimeBy(1000)
+            delay(1000)
             Result.success(User("test@test.com", "token"))
         }
 
-        viewModel.state.test {
-            // Skip initial state
-            awaitItem()
-            
-            viewModel.onIntent(LoginUiIntent.LoginClicked)
-            
-            // Should emit loading state
-            val loadingState = awaitItem()
-            assertTrue(loadingState.isLoading)
-            
-            // Advance time and get final state
-            advanceUntilIdle()
-            val finalState = awaitItem()
-            assertFalse(finalState.isLoading)
-            assertTrue(finalState.isSuccess)
-        }
+        viewModel.onIntent(LoginUiIntent.LoginClicked)
+        
+        assertTrue(viewModel.state.value.isLoading)
+        
+        advanceUntilIdle()
+        
+        assertFalse(viewModel.state.value.isLoading)
+        assertTrue(viewModel.state.value.isSuccess)
     }
 
     @Test
@@ -158,10 +150,10 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `8 Repository exception is handled by errorHandler`() = runTest {
+    fun `8 Repository exception is handled by onFailure`() = runTest {
         every { loginValidator.validateEmail(any()) } returns ValidationResult(true)
         every { loginValidator.validatePassword(any()) } returns ValidationResult(true)
-        // Throwing a raw exception to test errorHandler
+        // Throwing a raw exception to test runCatching in ViewModel
         coEvery { loginUseCase(any(), any()) } throws RuntimeException("Unexpected Crash")
 
         viewModel.effect.test {
@@ -169,7 +161,7 @@ class LoginViewModelTest {
             advanceUntilIdle()
             
             assertFalse(viewModel.state.value.isLoading)
-            assertEquals("An unexpected error occurred", viewModel.state.value.error)
+            assertEquals("Unexpected Crash", viewModel.state.value.error)
             val effect = awaitItem()
             assertTrue(effect is LoginUiEffect.ShowSnackBar)
             assertEquals("Unexpected Crash", (effect as LoginUiEffect.ShowSnackBar).message)

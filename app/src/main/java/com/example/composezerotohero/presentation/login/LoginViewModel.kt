@@ -71,9 +71,9 @@ class LoginViewModel @Inject constructor(
             return
         }
 
+        _state.update { it.copy(isLoading = true, error = null) }
+
         viewModelScope.launch(errorHandler) {
-            _state.update { it.copy(isLoading = true, error = null) }
-            
             // Safety: use runCatching to ensure we handle any unexpected throws from the domain layer
             val result = runCatching { loginUseCase(email, password) }.getOrElse { 
                 Result.failure(it) 

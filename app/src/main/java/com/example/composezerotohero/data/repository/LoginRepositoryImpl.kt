@@ -1,19 +1,23 @@
 package com.example.composezerotohero.data.repository
 
+import com.example.composezerotohero.data.remote.dto.LoginRequest
+import com.example.composezerotohero.data.remote.source.LoginRemoteDataSource
 import com.example.composezerotohero.domain.model.User
 import com.example.composezerotohero.domain.repository.LoginRepository
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 
-class LoginRepositoryImpl @Inject constructor() : LoginRepository {
+class LoginRepositoryImpl @Inject constructor(
+    private val remoteDataSource: LoginRemoteDataSource
+) : LoginRepository {
     override suspend fun login(email: String, password: String): Result<User> {
         return runCatching {
-            delay(2000) // Simulate network delay
-            if (email == "test@example.com" && password == "password") {
-                User(email, "fake-jwt-token")
-            } else {
-                throw Exception("Invalid credentials")
-            }
+            val response = remoteDataSource.login(
+                LoginRequest(email, password)
+            )
+            User(
+                email = response.email,
+                token = response.token
+            )
         }
     }
 }
