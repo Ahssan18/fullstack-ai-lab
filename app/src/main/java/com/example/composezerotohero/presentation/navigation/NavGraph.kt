@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.composezerotohero.presentation.home.HomeScreen
 import com.example.composezerotohero.presentation.login.LoginScreen
 
 @ExperimentalMaterial3Api
@@ -15,9 +16,16 @@ fun NavGraph(navController: NavHostController) {
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    // Handle post-login navigation if needed in future
+                    navController.navigate(Screen.Home.route) {
+                        // Crucial for Phase 3: Prevent back navigation to Login
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
             )
+        }
+
+        composable(Screen.Home.route) {
+            HomeScreen()
         }
     }
 }
